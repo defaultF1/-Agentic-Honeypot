@@ -1,3 +1,12 @@
+---
+title: Agentic Honeypot
+emoji: 🍯
+colorFrom: yellow
+colorTo: orange
+sdk: docker
+pinned: false
+---
+
 # 🛡️ Agentic Honeypot
 
 **The intelligent AI scam trap.**
