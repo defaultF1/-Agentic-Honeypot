@@ -1,0 +1,23 @@
+# Secrets
+.env
+.env.*
+*.key
+*.pem
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+
+# IDEs
+.vscode/
+.idea/
+
+# System
+thumbs.db
+Desktop.ini
+
+# Logs
+*.log
