@@ -8,6 +8,7 @@ import asyncio
 import logging
 import re
 import uuid
+import secrets
 from datetime import datetime
 from typing import Dict, Optional, List
 
@@ -39,12 +40,10 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "https://huggingface.co",
-        "https://*.hf.space",
-        "https://hackathon.guvi.in",  # GUVI Hackathon
-        "https://*.guvi.in",  # GUVI domains
         "http://localhost:3000",  # For local development
         "http://localhost:8000",  # For local development
     ],
+    allow_origin_regex=r"https://.*\.hf\.space|https://.*\.guvi\.in",
     allow_methods=["GET", "POST"],
     allow_headers=["X-API-Key", "x-api-key", "Content-Type", "Authorization"],
     max_age=600,  # Cache preflight requests for 10 minutes
@@ -91,6 +90,10 @@ async def auth_and_rate_limit_middleware(request: Request, call_next):
     if request.url.path in ["/health", "/metrics", "/docs", "/openapi.json"]:
         return await call_next(request)
 
+    # Skip auth for OPTIONS requests (CORS preflight)
+    if request.method == "OPTIONS":
+        return await call_next(request)
+
     api_key = request.headers.get("X-API-Key")
 
     if not api_key:
@@ -105,7 +108,7 @@ async def auth_and_rate_limit_middleware(request: Request, call_next):
             },
         )
 
-    if api_key != settings.api_key:
+    if not secrets.compare_digest(api_key, settings.api_key):
         return JSONResponse(
             status_code=403,
             content={
@@ -131,6 +134,8 @@ async def auth_and_rate_limit_middleware(request: Request, call_next):
                 }
             },
         )
+
+    return await call_next(request)
 
 
 # Anti-detection: typing delay calculator
